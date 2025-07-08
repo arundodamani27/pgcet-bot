@@ -11,7 +11,7 @@ import requests
 from bs4 import BeautifulSoup
 
 # ✅ Bot Token
-BOT_TOKEN = "8040176695:AAE5LGSITWbN7ewlEIwlRgQo6MaEPZ4OwWs"
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # ✅ Save user info to CSV
 def save_user(user):
