@@ -30,7 +30,7 @@ def save_user(user):
 def get_latest_kea_update():
     try:
         url = "https://cetonline.karnataka.gov.in/kea/"
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=20)
         soup = BeautifulSoup(response.text, "html.parser")
 
         table = soup.find("table", id="ContentPlaceHolder1_Gridlatestannoc")
