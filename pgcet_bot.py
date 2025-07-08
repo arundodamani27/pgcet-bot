@@ -320,5 +320,20 @@ app.add_handler(CommandHandler("colleges", colleges))
 app.add_handler(CommandHandler("predict", predict))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
 
-print("🤖 PGCET Bot running...")
-app.run_polling()
+
+
+PORT = int(os.environ.get("PORT", 8443))
+WEBHOOK_URL = f"https://pgcet_bot.up.railway.app"
+
+async def main():
+    await app.bot.set_webhook(f"{WEBHOOK_URL}/telegram-webhook")
+    await app.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        webhook_path="/telegram-webhook",
+    )
+
+if __name__ == '__main__':
+    import asyncio
+    asyncio.run(main())
+
