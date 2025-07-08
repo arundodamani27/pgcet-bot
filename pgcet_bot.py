@@ -33,7 +33,7 @@ def get_latest_kea_update():
         headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
         }
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=30)
 
         response = requests.get(url, timeout=10)
         soup = BeautifulSoup(response.text, "html.parser")
