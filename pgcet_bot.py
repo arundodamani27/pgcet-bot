@@ -30,9 +30,9 @@ def save_user(user):
 def get_latest_kea_update():
     try:
         url = "https://cetonline.karnataka.gov.in/kea/"
-       headers = {
+        headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-                }
+        }
         response = requests.get(url, headers=headers, timeout=20)
 
         soup = BeautifulSoup(response.text, "html.parser")
