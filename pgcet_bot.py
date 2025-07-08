@@ -31,10 +31,11 @@ def get_latest_kea_update():
     try:
         url = "https://cetonline.karnataka.gov.in/kea/"
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
         }
-        response = requests.get(url, headers=headers, timeout=20)
+        response = requests.get(url, headers=headers, timeout=10)
 
+        response = requests.get(url, timeout=10)
         soup = BeautifulSoup(response.text, "html.parser")
 
         table = soup.find("table", id="ContentPlaceHolder1_Gridlatestannoc")
@@ -69,7 +70,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📊 /cutoffs – View MCA & MBA PGCET 2024 Cutoffs\n"
         "📚 /syllabus – Download Syllabus PDFs\n"
         "🎓 /colleges – View colleges by district\n"
-        "📢 /kea – Get recent KEA updates\n"
+         "📄 /documents – View Required Documents for Verification\n"
+        #"📢 /kea – Get recent KEA updates\n"
         "📈 /predict – Predict rank by your marks\n"
     )
     await update.message.reply_text(welcome_text, parse_mode='Markdown')
@@ -88,6 +90,25 @@ async def mca_cutoff(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def mba_cutoff(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_document(open("mba_cutoff.pdf", "rb"), filename="MBA_Cutoff.pdf")
 
+# ✅ /documents
+async def documents(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = (
+        "📄 *Required Documents for Document Verification (PGCET 2025)*:\n\n"
+        "1️⃣ Final printout of the *PGCET Application Form 2025*\n"
+        "2️⃣ *PGCET Admit Card / Hall Ticket*\n"
+        "3️⃣ *SSLC Mark Card*\n"
+        "4️⃣ *II PUC Mark Card*\n"
+        "5️⃣ *Degree Marks Cards* (All Semesters)\n"
+        "6️⃣ *Provisional Degree Certificate* / Degree Certificate\n"
+        "7️⃣ *Study Certificate* (Minimum 7 years including 10th or 12th)\n"
+        "  - School study certificate should be attested by *BEO*\n"
+        "8️⃣ *Caste & Income Certificate* (If reservation is claimed)\n\n"
+        "📝 *NOTE:*\n"
+        "🔹 All the above documents must be *ORIGINAL*\n"
+        "🔹 Plus *TWO attested Xerox copies* (by Gazetted Officer)\n"
+        "🔹 So keep *3 sets* ready: 1 Original + 2 Attested Xerox\n"
+    )
+    await update.message.reply_text(message, parse_mode='Markdown')
 
 
 # ✅ /syllabus
@@ -112,7 +133,7 @@ async def kea(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ✅ /colleges (asks for district input)
 district_colleges = {
     "mangalore": {
-        "MCA": ["St Joseph Engineering College", "Sahyadri College", "Canara Engineering College"],
+        "MCA": ["St Joseph Engineering College", "Sahyadri College", "Canara Engineering College","A J Institute of Management","St. Agnes College(Autonomous)", "Shree Devi Institute Of Technology","Mangalore University College", "Srinivas Institute Of Technology(S.I.T)", "Srinivas College Pandeshwar"],
         "MBA": ["A J Institute of Management", "St Aloysius Institute of Management & Information Technology"]
     },
     "bangalore": {
@@ -127,22 +148,31 @@ async def colleges(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode='Markdown'
     )
     context.user_data["awaiting_district"] = True
-
 async def handle_district_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get("awaiting_district"):
         district = update.message.text.strip().lower()
-        course = "MCA"
-        colleges = district_colleges.get(district, {}).get(course)
+        mca_colleges = district_colleges.get(district, {}).get("MCA")
+        mba_colleges = district_colleges.get(district, {}).get("MBA")
 
-        if colleges:
-            reply = f"🏫 *{course} Colleges accepting PGCET in {district.title()}*:\n\n"
-            for clg in colleges:
-                reply += f"🔸 {clg}\n"
+        if not mca_colleges and not mba_colleges:
+            reply = f"❌ Sorry, no MCA or MBA colleges found in '{district.title()}'. Try another district."
         else:
-            reply = f"❌ Sorry, no {course} colleges found in '{district.title()}'. Try another district."
+            reply = f"🏙️ *Colleges accepting PGCET in {district.title()}*:\n\n"
+
+            if mca_colleges:
+                reply += "*🎓 MCA Colleges:*\n"
+                for clg in mca_colleges:
+                    reply += f"🔹 {clg}\n"
+                reply += "\n"
+
+            if mba_colleges:
+                reply += "*💼 MBA Colleges:*\n"
+                for clg in mba_colleges:
+                    reply += f"🔸 {clg}\n"
 
         await update.message.reply_text(reply, parse_mode='Markdown')
         context.user_data["awaiting_district"] = False
+
 
 def prepare(raw, total):
     rank_map = {}
@@ -285,6 +315,7 @@ app.add_handler(CommandHandler("syllabus", syllabus))
 app.add_handler(CommandHandler("mca_syllabus", mca_syllabus))
 app.add_handler(CommandHandler("mba_syllabus", mba_syllabus))
 app.add_handler(CommandHandler("kea", kea))
+app.add_handler(CommandHandler("documents", documents))
 app.add_handler(CommandHandler("colleges", colleges))
 app.add_handler(CommandHandler("predict", predict))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
