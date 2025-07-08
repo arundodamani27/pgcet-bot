@@ -1,1 +1,1 @@
-worker: python your_main_file.py
+worker: python pgcet_bot.py
